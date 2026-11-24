@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2f8f4e">
+  <meta name="description" content="이번 달 제철인 과일·채소·수산물을 알려주는 앱">
+  <title>지금제철</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- 상단 바 -->
+  <header class="topbar">
+    <button class="back" id="btn-back" type="button" aria-label="뒤로" hidden>‹</button>
+    <h1 class="app-title" id="top-title">지금제철</h1>
+  </header>
+
+  <main id="main">
+    <!-- 데이터 오류 -->
+    <section class="error" id="error" hidden>
+      <p class="error-title">데이터를 불러오지 못했어요</p>
+      <p class="error-desc" id="error-desc"></p>
+    </section>
+
+    <!-- 홈 : 이번 달 제철 -->
+    <section class="view" id="view-home" hidden>
+      <h2 class="view-title" id="home-title">이번 달 제철 식재료</h2>
+      <p class="view-sub" id="home-sub"></p>
+      <p class="price-loading" id="price-loading" role="status" hidden><span class="spinner" aria-hidden="true"></span>오늘 시세 확인 중</p>
+      <!-- 지금 사면 싸요 : 이번 달 제철 중 평년보다 10% 이상 싼 품목 (없으면 숨김) -->
+      <section class="cheap" id="cheap" hidden aria-labelledby="cheap-title">
+        <h3 class="cheap-title" id="cheap-title">지금 사면 싸요</h3>
+        <p class="cheap-sub" id="cheap-sub"></p>
+        <ul class="cards" id="cheap-list"></ul>
+      </section>
+      <div class="cat-tabs" data-scope="home" role="tablist" aria-label="분류"></div>
+      <ul class="cards" id="home-list"></ul>
+    </section>
+
+    <!-- 월별 달력 -->
+    <section class="view" id="view-month" hidden>
+      <h2 class="view-title" id="month-title">월별 제철</h2>
+      <div class="month-bar" id="month-bar" role="tablist" aria-label="월 선택"></div>
+      <div class="cat-tabs" data-scope="month" role="tablist" aria-label="분류"></div>
+      <ul class="cards" id="month-list"></ul>
+    </section>
+
+    <!-- 검색 -->
+    <section class="view" id="view-search" hidden>
+      <h2 class="view-title">품목 검색</h2>
+      <div class="search-box">
+        <input id="search-input" type="search" placeholder="품목명을 입력하세요 (예: 굴, 사과)" autocomplete="off" enterkeyhint="search" aria-label="품목명 검색">
+        <button id="search-clear" type="button" aria-label="검색어 지우기" hidden>×</button>
+      </div>
+      <div class="cat-tabs" data-scope="search" role="tablist" aria-label="분류"></div>
+      <p class="view-sub" id="search-count"></p>
+      <ul class="cards" id="search-list"></ul>
+    </section>
+
+    <!-- 즐겨찾기 -->
+    <section class="view" id="view-fav" hidden>
+      <h2 class="view-title">즐겨찾기</h2>
+      <p class="view-sub" id="fav-sub"></p>
+      <ul class="cards" id="fav-list"></ul>
+    </section>
+
+    <!-- 상세 -->
+    <section class="view detail" id="view-detail" hidden>
+      <div class="detail-hero" id="d-hero" aria-hidden="true"><img id="d-img" alt="" width="1600" height="1600" decoding="async"></div>
+      <div class="detail-head">
+        <span class="badge" id="d-badge"></span>
+        <button class="fav-btn" id="d-fav" type="button" aria-pressed="false">☆ 즐겨찾기</button>
+      </div>
+      <h2 class="detail-name" id="d-name"></h2>
+      <dl class="detail-info">
+        <dt>제철 기간</dt><dd id="d-season"></dd>
+        <dt>지금은</dt><dd id="d-now"></dd>
+      </dl>
+      <!-- 시세 (KAMIS, 매핑된 품목·가격이 있을 때만) -->
+      <section class="price-card" id="d-price" hidden aria-label="오늘 소매 시세">
+        <div class="price-row">
+          <span class="price-val" id="d-price-val"></span>
+          <span class="price-unit" id="d-price-unit"></span>
+          <span class="price-verdict" id="d-price-verdict" hidden></span>
+        </div>
+        <p class="price-meta" id="d-price-meta"></p>
+        <p class="price-src">소매가 기준 · 출처: KAMIS <span class="price-src-note">(도·소매 시장 평균 가격이며 농가 수취가나 경락가가 아닙니다)</span></p>
+      </section>
+      <h3 class="detail-label">특징</h3>
+      <p class="detail-note" id="d-note"></p>
+      <h3 class="detail-label" id="d-pick-label">고르는 법</h3>
+      <p class="detail-note" id="d-pick"></p>
+      <h3 class="detail-label" id="d-store-label">보관법</h3>
+      <p class="detail-note" id="d-store"></p>
+      <h3 class="detail-label" id="d-dishes-label">어울리는 요리</h3>
+      <ul class="chips" id="d-dishes"></ul>
+      <h3 class="detail-label">제철 달</h3>
+      <ol class="month-grid" id="d-months" aria-label="1월부터 12월까지 제철 표시"></ol>
+      <p class="legend"><span class="lg on"></span>제철 <span class="lg now"></span>이번 달</p>
+    </section>
+
+    <!-- 요리 레시피 (상세의 어울리는 요리에서 이동) -->
+    <section class="view recipe" id="view-recipe" hidden>
+      <p class="recipe-from" id="r-from"></p>
+      <h2 class="detail-name" id="r-name"></h2>
+      <p class="recipe-meta" id="r-meta">
+        <span class="recipe-tag" id="r-servings"></span>
+        <span class="recipe-tag" id="r-time"></span>
+      </p>
+      <h3 class="detail-label">재료 <span class="recipe-count" id="r-ing-count"></span></h3>
+      <ul class="ingredients" id="r-ingredients"></ul>
+      <h3 class="detail-label">만드는 순서</h3>
+      <ol class="steps" id="r-steps"></ol>
+    </section>
+  </main>
+
+  <!-- 하단 탭 -->
+  <nav class="tabbar" aria-label="화면">
+    <a class="tab" href="#home" data-tab="home"><span class="tab-ic" aria-hidden="true">◎</span>이번 달</a>
+    <a class="tab" href="#month" data-tab="month"><span class="tab-ic" aria-hidden="true">▦</span>월별</a>
+    <a class="tab" href="#search" data-tab="search"><span class="tab-ic" aria-hidden="true">⌕</span>검색</a>
+    <a class="tab" href="#fav" data-tab="fav"><span class="tab-ic" aria-hidden="true">★</span>즐겨찾기</a>
+  </nav>
+
+  <!-- 인증키 설정 (깃 제외 파일, 없으면 시세 기능만 꺼짐) -->
+  <script src="config.local.js" onerror="void 0"></script>
+  <script src="kamis.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

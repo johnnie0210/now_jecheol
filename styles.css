@@ -1,0 +1,238 @@
+/* 지금제철 — 흰 배경, 카드형 목록, 시스템 글꼴 */
+:root {
+  --bg: #ffffff;
+  --surface: #f6f7f5;
+  --line: #e6e8e4;
+  --img-bg: #fbf3e4;   /* 이미지 배경(연한 크림)과 같은 색 : 로딩 중·실패 시 자리 */
+  --ink: #1d211e;
+  --ink-soft: #626a64;
+  --brand: #2f8f4e;
+  --brand-soft: #e8f4ec;
+
+  /* 분류 색 : 과일(주황·빨강) / 채소(초록) / 수산물(파랑) */
+  --fruit: #d9480f;  --fruit-bg: #fff0e6;
+  --veg: #2b8a3e;    --veg-bg: #e9f7ec;
+  --sea: #1c6fd1;    --sea-bg: #e8f1fc;
+
+  --tabbar-h: 62px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  font-size: 16px; line-height: 1.55;
+  -webkit-tap-highlight-color: transparent;
+}
+[hidden] { display: none !important; }
+button { font: inherit; }
+
+/* 상단 바 */
+.topbar {
+  position: sticky; top: 0; z-index: 5; background: var(--bg);
+  display: flex; align-items: center; gap: 6px;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--line);
+}
+.app-title { margin: 0; font-size: 20px; font-weight: 800; color: var(--brand); letter-spacing: -.2px; }
+.back {
+  border: 0; background: transparent; font-size: 30px; line-height: 1; padding: 0 8px 4px 0; color: var(--ink); cursor: pointer;
+}
+
+main {
+  max-width: 720px; margin: 0 auto;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 24px) max(16px, env(safe-area-inset-left, 0px));
+}
+.view-title { margin: 4px 0 2px; font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
+.view-sub { margin: 0 0 12px; font-size: 14px; color: var(--ink-soft); }
+
+/* 분류 탭 */
+.cat-tabs { display: flex; gap: 8px; margin: 12px 0; overflow-x: auto; scrollbar-width: none; }
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat {
+  flex: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink-soft);
+  border-radius: 999px; padding: 7px 15px; font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.cat .n { font-size: 13px; font-weight: 500; margin-left: 3px; opacity: .8; }
+.cat[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* 월 선택 (가로 스크롤) */
+.month-bar { display: flex; gap: 8px; overflow-x: auto; padding: 6px 2px 8px; margin: 8px -2px 0; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.mon {
+  flex: none; min-width: 56px; border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  border-radius: 14px; padding: 8px 10px; font-size: 16px; font-weight: 700; cursor: pointer; scroll-snap-align: center;
+  display: flex; flex-direction: column; align-items: center; line-height: 1.25;
+}
+.mon small { font-size: 12px; font-weight: 500; color: var(--ink-soft); }
+.mon.today { border-color: var(--brand); }
+.mon[aria-selected="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+.mon[aria-selected="true"] small { color: #e3f3e8; }
+
+/* 카드 목록 */
+.cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.card {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  border: 1px solid var(--line); background: var(--bg); border-radius: 14px; padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(20, 30, 22, .04); transition: border-color .15s, transform .1s;
+  color: inherit;
+}
+.card:hover { border-color: #cfd4cc; }
+.card:active { transform: scale(.99); }
+.card:focus-visible, .cat:focus-visible, .mon:focus-visible, .tab:focus-visible, .fav-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+/* 카드 썸네일 (왼쪽) : 이미지가 없거나 실패하면 기본 아이콘 */
+.card { display: flex; align-items: center; gap: 12px; }
+.card-body { display: block; flex: 1; min-width: 0; }
+.thumb {
+  flex: none; width: 64px; height: 64px; border-radius: 12px; overflow: hidden;
+  background: var(--img-bg); display: flex; align-items: center; justify-content: center;
+}
+.thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.thumb.noimg::after, .detail-hero.noimg::after { content: "🌱"; font-size: 26px; opacity: .45; }
+.card-top { display: flex; align-items: center; gap: 8px; }
+.card-name { font-size: 17px; font-weight: 700; min-width: 0; }
+.card-star { margin-left: auto; color: #f2a900; font-size: 16px; }
+.card-season { margin-top: 4px; font-size: 14px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.card-season b { color: var(--ink); font-weight: 600; }
+.card-note {
+  margin-top: 4px; font-size: 15px; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 분류 뱃지 */
+.badge { flex: none; font-size: 12.5px; font-weight: 700; border-radius: 6px; padding: 2px 8px; }
+.badge.fruit { color: var(--fruit); background: var(--fruit-bg); }
+.badge.veg { color: var(--veg); background: var(--veg-bg); }
+.badge.sea { color: var(--sea); background: var(--sea-bg); }
+
+/* 빈 화면 · 오류 */
+.empty { padding: 40px 12px; text-align: center; color: var(--ink-soft); font-size: 15px; }
+.empty b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
+.error { margin-top: 40px; padding: 20px; border: 1px solid #f1c4c4; background: #fff5f5; border-radius: 14px; }
+.error-title { margin: 0 0 6px; font-weight: 800; color: #b42318; font-size: 17px; }
+.error-desc { margin: 0; color: var(--ink-soft); font-size: 14px; word-break: break-all; }
+
+/* 검색 */
+.search-box { position: relative; margin-top: 10px; }
+#search-input {
+  width: 100%; font: inherit; font-size: 16px; padding: 12px 42px 12px 14px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); outline: none;
+}
+#search-input:focus { border-color: var(--brand); background: var(--bg); }
+#search-input::-webkit-search-cancel-button { display: none; }
+#search-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  border: 0; background: transparent; font-size: 22px; color: var(--ink-soft); padding: 4px 10px; cursor: pointer;
+}
+
+/* 상세 */
+/* 상세 상단 큰 이미지 */
+.detail-hero {
+  margin-top: 4px; width: 100%; max-width: 360px; aspect-ratio: 1 / 1; margin-left: auto; margin-right: auto;
+  border-radius: 18px; overflow: hidden; background: var(--img-bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.detail-hero img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.detail-hero.noimg img { display: none; }
+.detail-hero.noimg::after { font-size: 56px; }
+.detail-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; }
+.detail-name { margin: 10px 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -.4px; }
+.fav-btn {
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px;
+  padding: 7px 14px; font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.fav-btn[aria-pressed="true"] { border-color: #f2a900; background: #fff8e1; color: #8a5a00; }
+.detail-info { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 10px 0 0; font-size: 16px; }
+.detail-info dt { color: var(--ink-soft); }
+.detail-info dd { margin: 0; font-weight: 600; }
+.detail-info dd.in { color: var(--brand); }
+.detail-info dd.out { color: var(--ink-soft); }
+.detail-label { margin: 22px 0 8px; font-size: 14px; font-weight: 700; color: var(--ink-soft); }
+.detail-note { margin: 0; font-size: 16px; line-height: 1.7; }
+.month-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.month-grid li {
+  position: relative; text-align: center; padding: 10px 0; border-radius: 10px; font-size: 15px; font-weight: 600;
+  background: var(--surface); color: #a3aaa4; border: 2px solid transparent; font-variant-numeric: tabular-nums;
+}
+.month-grid li.on { background: var(--brand); color: #fff; }
+.month-grid li.now { border-color: var(--ink); }
+.legend { margin: 10px 0 0; font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+.lg { display: inline-block; width: 14px; height: 14px; border-radius: 4px; }
+.lg.on { background: var(--brand); }
+.lg.now { border: 2px solid var(--ink); margin-left: 8px; }
+
+/* 시세 로딩 (작게) */
+.price-loading { display: flex; align-items: center; gap: 6px; margin: -4px 0 8px; font-size: 13px; color: var(--ink-soft); }
+.spinner { width: 12px; height: 12px; border: 2px solid var(--line); border-top-color: var(--brand); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 지금 사면 싸요 섹션 */
+.cheap { margin: 6px 0 14px; padding: 14px; border-radius: 16px; background: var(--brand-soft); }
+.cheap-title { margin: 0; font-size: 18px; font-weight: 800; color: var(--brand); }
+.cheap-sub { margin: 2px 0 10px; font-size: 13px; color: var(--ink-soft); }
+.cheap .card { border-color: #cfe6d6; }
+
+/* 시세 판정 뱃지 : 싸요(초록) / 조금 싸요(연초록) / 비싸요(회색, 정보만) */
+.pbadge { display: inline-block; margin-left: 8px; font-size: 12px; font-weight: 700; border-radius: 6px; padding: 1px 7px; vertical-align: 1px; }
+.pbadge.cheap { color: #fff; background: var(--brand); }
+.pbadge.bitcheap { color: var(--brand); background: var(--brand-soft); }
+.pbadge.pricey { color: var(--ink-soft); background: var(--surface); border: 1px solid var(--line); }
+
+/* 상세 시세 카드 */
+.price-card { margin-top: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.price-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; }
+.price-val { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.price-unit { font-size: 15px; color: var(--ink-soft); }
+.price-verdict { margin-left: auto; }
+.price-meta { margin: 4px 0 0; font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.price-src { margin: 6px 0 0; font-size: 12px; color: var(--ink-soft); }
+.price-src-note { display: block; }
+
+/* 어울리는 요리 칩 (이름만, 누를 수 없음) */
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: 15px; padding: 5px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+/* 레시피가 있는 요리 : 눌러서 레시피 화면으로 (없는 요리는 위의 일반 칩) */
+.chip-link {
+  display: inline-flex; align-items: center; gap: 4px; text-decoration: none; cursor: pointer;
+  color: var(--brand); background: var(--brand-soft); border-color: #cfe6d6; font-weight: 600;
+}
+.chip-link:active { transform: scale(.97); }
+.chip-link:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.chip-arrow { font-size: 17px; line-height: 1; }
+
+/* 요리 레시피 화면 */
+.recipe-from { margin: 6px 0 0; font-size: 14px; color: var(--ink-soft); }
+.recipe-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0; }
+.recipe-tag { font-size: 15px; font-weight: 600; padding: 4px 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); }
+.recipe-tag[hidden] { display: none; }
+.recipe-count { font-weight: 400; }
+.ingredients { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.ingredients li + li { border-top: 1px solid var(--line); }
+.ing { display: flex; align-items: center; gap: 12px; padding: 12px 14px; font-size: 16px; cursor: pointer; }
+.ing input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--brand); }
+.ing input:checked + span { color: var(--ink-soft); text-decoration: line-through; }
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: flex; flex-direction: column; gap: 14px; }
+.steps li { counter-increment: step; position: relative; padding-left: 40px; font-size: 16px; line-height: 1.7; }
+.steps li::before {
+  content: counter(step); position: absolute; left: 0; top: 1px; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--brand); color: #fff; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+
+/* 하단 탭 */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--bg); border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+.tab {
+  height: var(--tabbar-h); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  text-decoration: none; color: var(--ink-soft); font-size: 12.5px; font-weight: 600;
+}
+.tab-ic { font-size: 20px; line-height: 1.1; }
+.tab.active { color: var(--brand); }
+
+@media (min-width: 560px) {
+  .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .month-grid { grid-template-columns: repeat(12, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

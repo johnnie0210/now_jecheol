@@ -1,0 +1,6 @@
+# 의존성 / 로그
+node_modules/
+*.log
+
+# KAMIS 인증키 설정 (build/make-config.mjs 로 생성) — 절대 커밋 금지
+config.local.js
